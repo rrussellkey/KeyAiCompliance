@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Review Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .upload-area.drag-over {
+            border-color: #667eea;
+            background: #e6fffa;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #a0aec0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            color: #4a5568;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .results {
+            display: none;
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .results h2 {
+            color: #22543d;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .results-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            display: none;
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #742a2a;
+        }
+
+        .file-info {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .file-size {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Compliance Review Tool</h1>
+            <p>Upload your PDF documents for automated compliance review</p>
+        </div>
+
+        <div class="main-content">
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="templateSelect">Review Template</label>
+                    <select id="templateSelect" required>
+                        <option value="">Select a review template...</option>
+                        <option value="contract">Contract Review</option>
+                        <option value="policy">Policy Compliance</option>
+                        <option value="risk">Risk Assessment</option>
+                        <option value="regulatory">Regulatory Compliance</option>
+                        <option value="vendor">Vendor Agreement</option>
+                        <option value="financial">Financial Document Review</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fileInput">Upload PDF Document</label>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📄</div>
+                        <p><strong>Click to select</strong> or drag and drop your PDF file here</p>
+                        <p style="margin-top: 10px; color: #718096;">Maximum file size: 10MB</p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf" style="display: none;" required>
+                    <div class="file-info" id="fileInfo">
+                        <div class="file-name" id="fileName"></div>
+                        <div class="file-size" id="fileSize"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Start Compliance Review
+                </button>
+            </form>
+
+            <div class="loading" id="loadingSection">
+                <div class="spinner"></div>
+                <div class="progress-text" id="progressText">Processing your document...</div>
+                <p style="color: #718096;">This may take 1-3 minutes depending on document size</p>
+            </div>
+
+            <div class="results" id="resultsSection">
+                <h2>📋 Compliance Review Results</h2>
+                <div class="results-content" id="resultsContent"></div>
+            </div>
+
+            <div class="error" id="errorSection">
+                <h3>❌ Error</h3>
+                <p id="errorMessage"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Replace with your Make.com webhook URL
+        const WEBHOOK_URL = 'YOUR_MAKE_WEBHOOK_URL_HERE';
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const form = document.getElementById('reviewForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingSection = document.getElementById('loadingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContent = document.getElementById('resultsContent');
+        const errorSection = document.getElementById('errorSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const progressText = document.getElementById('progressText');
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                displayFileInfo(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                displayFileInfo(file);
+            }
+        }
+
+        function displayFileInfo(file) {
+            fileName.textContent = file.name;
+            fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            fileInfo.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const template = document.getElementById('templateSelect').value;
+            const file = fileInput.files[0];
+
+            if (!template || !file) {
+                showError('Please select a template and upload a PDF file.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File size must be less than 10MB.');
+                return;
+            }
+
+            if (file.type !== 'application/pdf') {
+                showError('Please upload a PDF file only.');
+                return;
+            }
+
+            hideAllSections();
+            showLoading();
+            
+            try {
+                await processDocument(template, file);
+            } catch (error) {
+                showError('Failed to process document. Please try again.');
+                console.error('Error:', error);
+            }
+        });
+
+        async function processDocument(template, file) {
+            // Update progress text
+            const progressSteps = [
+                'Uploading document...',
+                'Extracting text content...',
+                'Running compliance analysis...',
+                'Generating review report...',
+                'Finalizing results...'
+            ];
+
+            let currentStep = 0;
+            const progressInterval = setInterval(() => {
+                if (currentStep < progressSteps.length) {
+                    progressText.textContent = progressSteps[currentStep];
+                    currentStep++;
+                }
+            }, 8000);
+
+            try {
+                const formData = new FormData();
+                formData.append('template', template);
+                formData.append('file', file);
+                formData.append('fileName', file.name);
+                formData.append('fileSize', file.size);
+
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                showResults(result);
+
+            } catch (error) {
+                clearInterval(progressInterval);
+                throw error;
+            }
+        }
+
+        function showLoading() {
+            loadingSection.style.display = 'block';
+            submitBtn.disabled = true;
+        }
+
+        function showResults(result) {
+            hideAllSections();
+            resultsContent.textContent = result.review || result.message || 'Review completed successfully.';
+            resultsSection.style.display = 'block';
+            submitBtn.disabled = false;
+        }
+
+        function showError(message) {
+            hideAllSections();
+            errorMessage.textContent = message;
+            errorSection.style.display = 'block';
+            submitBtn.disabled = false;
+        }
+
+        function hideAllSections() {
+            loadingSection.style.display = 'none';
+            resultsSection.style.display = 'none';
+            errorSection.style.display = 'none';
+        }
+
+        // Demo mode (remove this in production)
+        if (WEBHOOK_URL === 'YOUR_MAKE_WEBHOOK_URL_HERE') {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                hideAllSections();
+                showLoading();
+                
+                // Simulate processing time
+                setTimeout(() => {
+                    const mockResult = {
+                        review: `COMPLIANCE REVIEW REPORT
+
+Document: ${fileInput.files[0]?.name || 'sample.pdf'}
+Template: ${document.getElementById('templateSelect').value}
+Review Date: ${new Date().toLocaleDateString()}
+
+SUMMARY:
+✅ Overall Compliance Status: APPROVED with minor recommendations
+
+KEY FINDINGS:
+• Document structure meets regulatory requirements
+• All required sections are present and complete
+• Legal language is appropriate and compliant
+• No critical compliance violations identified
+
+RECOMMENDATIONS:
+• Consider updating clause 3.2 for better clarity
+• Add version control information
+• Include effective date on page 1
+
+RISK ASSESSMENT: LOW
+Next Review Date: ${new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}
+
+This is a demo response. Connect your Make.com webhook to get real AI-powered compliance reviews.`
+                    };
+                    showResults(mockResult);
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>
