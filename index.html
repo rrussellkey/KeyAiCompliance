@@ -224,12 +224,26 @@
                     <label for="templateSelect">Review Template</label>
                     <select id="templateSelect" required>
                         <option value="">Select a review template...</option>
-                        <option value="contract">Contract Review</option>
-                        <option value="policy">Policy Compliance</option>
-                        <option value="risk">Risk Assessment</option>
-                        <option value="regulatory">Regulatory Compliance</option>
-                        <option value="vendor">Vendor Agreement</option>
-                        <option value="financial">Financial Document Review</option>
+                        <optgroup label="Listing Reviews">
+                            <option value="listing_oh_mi">Listing File Review - OH/MI</option>
+                            <option value="listing_in">Listing Processing - Indiana</option>
+                            <option value="listing_co">Listing Processing - Colorado</option>
+                        </optgroup>
+                        <optgroup label="Sales Reviews">
+                            <option value="sales_oh_mi">Sales Processing - OH/MI</option>
+                            <option value="sales_in">Sales Processing - Indiana</option>
+                            <option value="sales_co">Sales Processing - Colorado</option>
+                        </optgroup>
+                        <optgroup label="Closing Reviews - Standard Funding">
+                            <option value="closing_standard_oh_mi">Standard Funding - OH/MI</option>
+                            <option value="closing_standard_in">Standard Funding - Indiana</option>
+                            <option value="closing_standard_co">Standard Funding - Colorado</option>
+                        </optgroup>
+                        <optgroup label="Closing Reviews - Table Funding">
+                            <option value="closing_table_oh_mi">Table Funding - OH/MI (UAT Only)</option>
+                            <option value="closing_table_in">Table Funding - Indiana</option>
+                            <option value="closing_table_co">Table Funding - Colorado</option>
+                        </optgroup>
                     </select>
                 </div>
 
